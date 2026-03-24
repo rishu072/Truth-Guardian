@@ -73,14 +73,15 @@ export default function VerifyImagePage() {
       })
       return
     }
-    if (!deductCredits(10)) {
+    const canDeduct = await deductCredits(10)
+    if (!canDeduct) {
       return
     }
     setIsLoading(true)
 
     try {
       const result = await verifyImageNews(file, data.claim || "Verify this image")
-      
+
       sessionStorage.setItem("verificationResult", JSON.stringify(result))
       sessionStorage.setItem("verificationType", "image")
       sessionStorage.setItem("savedFireStore", "False")
@@ -171,18 +172,18 @@ export default function VerifyImagePage() {
                 )}
               </div>
               <div className="relative">
-              <Textarea
-                placeholder="Paste news content here or use the microphone to dictate..."
-                className="min-h-[200px] bg-gray-900 border-gray-700 pr-12"
-                {...register("claim")}
+                <Textarea
+                  placeholder="Paste news content here or use the microphone to dictate..."
+                  className="min-h-[200px] bg-gray-900 border-gray-700 pr-12"
+                  {...register("claim")}
                 />
                 <div className="absolute right-3 bottom-3">
-                                        <SpeechToText shouldOn={user? user.credits>=10 : false} onTranscript={handleSpeechToTextContent} />
-                                      </div>
+                  <SpeechToText shouldOn={user ? user.credits >= 10 : false} onTranscript={handleSpeechToTextContent} />
+                </div>
               </div>
-              
 
-<div className="flex flex-col space-y-2">
+
+              <div className="flex flex-col space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-400">Cost: 10 credit</span>
                   {user ? (
@@ -200,16 +201,15 @@ export default function VerifyImagePage() {
                 </div>
               </div>
 
-              <motion.div 
-                className="flex justify-center" 
-                whileHover={{ scale: 1.03 }} 
+              <motion.div
+                className="flex justify-center"
+                whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
               >
                 <Button
                   type="submit"
                   size="lg"
-                  // disabled={isLoading || !file}
-                  disabled={isLoading || !user || !file || user.credits<10}
+                  disabled={isLoading || !user || !file || user.credits < 10}
                   className="w-full md:w-auto px-8 py-6 text-lg"
                 >
                   {isLoading ? (

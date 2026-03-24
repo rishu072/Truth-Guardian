@@ -47,7 +47,8 @@ export default function VerifyTextPage() {
       return
     }
 
-    if (!deductCredits(1)) {
+    const canDeduct = await deductCredits(1)
+    if (!canDeduct) {
       return
     }
     setIsLoading(true)
@@ -71,7 +72,7 @@ export default function VerifyTextPage() {
   }
 
   return (
-<div className="container mx-auto px-4 pt-24 pb-12">
+    <div className="container mx-auto px-4 pt-24 pb-12">
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -88,41 +89,41 @@ export default function VerifyTextPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="relative">
-              <Textarea
-                placeholder="Paste news content here or use the microphone to dictate..."
-                className="min-h-[200px] bg-gray-900 border-gray-700 pr-12"
-                {...register("content", {
-                  required: "Content is required",
-                  validate: value => value.trim().length > 0 || "Please enter valid content"
-                })}
+              <div className="relative">
+                <Textarea
+                  placeholder="Paste news content here or use the microphone to dictate..."
+                  className="min-h-[200px] bg-gray-900 border-gray-700 pr-12"
+                  {...register("content", {
+                    required: "Content is required",
+                    validate: value => value.trim().length > 0 || "Please enter valid content"
+                  })}
                 />
                 <div className="absolute right-3 bottom-3">
-                        <SpeechToText shouldOn={user? user.credits>=1 : false} onTranscript={handleSpeechToTextContent} />
-                      </div>
-                    </div>
+                  <SpeechToText shouldOn={user ? user.credits >= 1 : false} onTranscript={handleSpeechToTextContent} />
+                </div>
+              </div>
               {errors.content && (
                 <p className="text-sm font-medium text-destructive">{errors.content.message}</p>
               )}
-<div className="mt-4 flex flex-col space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Cost: 1 credit</span>
-                    {user ? (
-                      <span className="text-sm text-gray-400">
-                        Your credits: <span className="font-bold text-primary">{user.credits}</span>
-                      </span>
-                    ) : (
-                      <span className="text-sm text-gray-400">
-                        <Button variant="link" className="p-0 h-auto text-primary" asChild>
-                          <Link href="/sign-in">Sign in</Link>
-                        </Button>{" "}
-                        to use credits
-                      </span>
-                    )}
-                  </div>
+              <div className="mt-4 flex flex-col space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-400">Cost: 1 credit</span>
+                  {user ? (
+                    <span className="text-sm text-gray-400">
+                      Your credits: <span className="font-bold text-primary">{user.credits}</span>
+                    </span>
+                  ) : (
+                    <span className="text-sm text-gray-400">
+                      <Button variant="link" className="p-0 h-auto text-primary" asChild>
+                        <Link href="/sign-in">Sign in</Link>
+                      </Button>{" "}
+                      to use credits
+                    </span>
+                  )}
                 </div>
+              </div>
               <motion.div className="mt-6 flex justify-center" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                <Button type="submit" size="lg" disabled={isLoading || !user || user.credits<1} className="w-full md:w-auto px-8 py-6 text-lg">
+                <Button type="submit" size="lg" disabled={isLoading || !user || user.credits < 1} className="w-full md:w-auto px-8 py-6 text-lg">
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -134,14 +135,14 @@ export default function VerifyTextPage() {
                 </Button>
               </motion.div>
               {!user && (
-                  <p className="text-center text-sm text-gray-400 mt-4">
-                    Please{" "}
-                    <Link href="/sign-in" className="text-primary hover:underline">
-                      sign in
-                    </Link>{" "}
-                    to verify content
-                  </p>
-                )}
+                <p className="text-center text-sm text-gray-400 mt-4">
+                  Please{" "}
+                  <Link href="/sign-in" className="text-primary hover:underline">
+                    sign in
+                  </Link>{" "}
+                  to verify content
+                </p>
+              )}
             </form>
           </CardContent>
         </Card>

@@ -32,6 +32,17 @@ type User = {
   avatar?: string
 }
 
+interface VerificationData {
+  title: string
+  truth_score: number
+  verdict: string
+  reason: string
+  evidence_links: string[]
+  userId?: string
+  timestamp?: any
+  [key: string]: any
+}
+
 type AuthContextType = {
   user: User | null
   isLoading: boolean
@@ -42,9 +53,9 @@ type AuthContextType = {
   deductCredits: (amount: number) => Promise<boolean>
   addCredits: (amount: number) => void
   updateProfile: (updates: { name?: string; avatar?: string }) => Promise<void>
-  saveVerification: (response: any) => Promise<string | undefined>
-  fetchUserVerifications: (userId: string) => Promise<any[]>
-  getVerificationById: (id: string) => Promise<any | null>
+  saveVerification: (response: VerificationData) => Promise<string | undefined>
+  fetchUserVerifications: (userId: string) => Promise<(VerificationData & { id: string })[]>
+  getVerificationById: (id: string) => Promise<(VerificationData & { id: string; name: string }) | null>
 
 }
 
@@ -89,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user])
 
-  const saveVerification = async (response: any): Promise<string | undefined> => {
+  const saveVerification = async (response: VerificationData): Promise<string | undefined> => {
     if (!user) return
     try {
       const verificationsRef = collection(db, "verifications")
@@ -108,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
 
-  const fetchUserVerifications = async (userId: string): Promise<any[]> => {
+  const fetchUserVerifications = async (userId: string): Promise<(VerificationData & { id: string })[]> => {
     try {
       const verificationsRef = collection(db, "verifications")
       const q = query(
@@ -118,14 +129,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         limit(10)
       )
       const querySnapshot = await getDocs(q)
-      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as VerificationData & { id: string }))
     } catch (error: any) {
       console.error("Error fetching verifications:", error instanceof Error ? error.message : String(error))
       return []
     }
   }
 
-  const getVerificationById = async (id: string): Promise<any | null> => {
+  const getVerificationById = async (id: string): Promise<(VerificationData & { id: string; name: string }) | null> => {
     try {
       const docRef = doc(db, "verifications", id)
       const docSnap = await getDoc(docRef)
@@ -135,10 +146,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const userDoc = await getDoc(userDocRef)
         if (userDoc.exists()) {
           const userData = userDoc.data()
-
-          return { id: docSnap.id, name: userData.name, ...docSnap.data() }
+          return { id: docSnap.id, name: userData.name, ...docSnap.data() } as VerificationData & { id: string; name: string }
         }
-        return { id: docSnap.id, name: "Unverified User", ...docSnap.data() }
+        return { id: docSnap.id, name: "Unverified User", ...docSnap.data() } as VerificationData & { id: string; name: string }
       } else {
         console.warn("No such verification found with ID:", id)
         return null

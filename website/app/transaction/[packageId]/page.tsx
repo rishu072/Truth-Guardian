@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import jsPDF from "jspdf";
 import { BadgeCheck, IndianRupee } from "lucide-react";
-import logoBase64 from "@/lib/logo-base64"; 
+import logoBase64 from "@/lib/logo-base64";
 import { generateQRCode } from "@/lib/qr";
 import { getUserCurrencyInfo } from "@/lib/currency";
 import { convertCurrency } from "@/lib/exchange";
@@ -23,18 +23,10 @@ const packages = [
 export default function TransactionPage() {
   const { addCredits, isLoading, user } = useAuth();
   const [localCurrency, setLocalCurrency] = useState("INR");
-const [localPrice, setLocalPrice] = useState<number | null>(null);
-const [currencySymbol, setCurrencySymbol] = useState("₹");
+  const [localPrice, setLocalPrice] = useState<number | null>(null);
+  const [currencySymbol, setCurrencySymbol] = useState("₹");
   const router = useRouter();
   const params = useParams();
-
-  // useEffect(() => {
-  //   if (!user) {
-  //     router.push("/sign-in")
-  //   }
-  // }, [user, router])
-
-  // if (!user) return null
 
   useEffect(() => {
     if (typeof window !== "undefined" && !isLoading && !user) {
@@ -52,7 +44,7 @@ const [currencySymbol, setCurrencySymbol] = useState("₹");
 
   useEffect(() => {
     if (!selectedPackage) return;
-  
+
     const fetchCurrency = async () => {
       const info = await getUserCurrencyInfo();
       setLocalCurrency(info.currency);
@@ -60,12 +52,12 @@ const [currencySymbol, setCurrencySymbol] = useState("₹");
       const convertedPrice = await convertCurrency(selectedPackage.price, "INR", info.currency);
       setLocalPrice(convertedPrice);
     };
-  
+
     fetchCurrency();
   }, [params.packageId]);
-  
-  
-  
+
+
+
   const generatePDFReceipt = async (details: {
     name: string;
     email: string;
@@ -180,7 +172,7 @@ const [currencySymbol, setCurrencySymbol] = useState("₹");
           generatePDFReceipt({
             name: user?.name || "User",
             email: user?.email || "user@example.com",
-            currency:localCurrency,
+            currency: localCurrency,
             amount: localPrice,
             credits: selectedPackage.credits,
             packageName: selectedPackage.name,
