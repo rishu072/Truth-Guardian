@@ -57,7 +57,7 @@ export async function analyzeWithGemini(prompt: string, imageData?: { mimeType: 
     });
 
     const data = await response.json();
-    
+
     if (data.error) {
       throw new Error(data.error.message);
     }
@@ -67,7 +67,7 @@ export async function analyzeWithGemini(prompt: string, imageData?: { mimeType: 
   } catch (error) {
     console.error("Gemini API error:", error);
     return {
-      title:"Error",
+      title: "Error",
       truth_score: 0,
       verdict: "Error",
       reason: error instanceof Error ? error.message : "API request failed",
@@ -75,42 +75,42 @@ export async function analyzeWithGemini(prompt: string, imageData?: { mimeType: 
     };
   }
 }
-  
-  function extractJson(text: string): GeminiResponse {
+
+function extractJson(text: string): GeminiResponse {
+  try {
+    return JSON.parse(text);
+  } catch (directError) {
     try {
-      return JSON.parse(text);
-    } catch (directError) {
-      try {
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          return JSON.parse(jsonMatch[0]);
-        }
-      } catch (extractError) {
-        console.error("JSON extraction failed:", text);
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
       }
+    } catch (extractError) {
+      console.error("JSON extraction failed:", text);
     }
-  
-    return {
-      title:"Error",
-      truth_score: 0,
-      verdict: "Error",
-      reason: "Could not parse response",
-      evidence_links: []
-    };
   }
 
+  return {
+    title: "Error",
+    truth_score: 0,
+    verdict: "Error",
+    reason: "Could not parse response",
+    evidence_links: []
+  };
+}
+
 export function generateTextCheckPrompt(newsText: string, searchResults: any[]): string {
-    let prompt = `Analyze this news claim and your existing data and knowledge.The respond STRICTLY in JSON format:\n\n`;
-    prompt += `Claim: "${newsText}"\n\n`;
-  
-    if (searchResults.length > 0) {
-      prompt += `Supporting search results:\n`;
-      searchResults.forEach((result, i) => {
-        prompt += `${i + 1}. ${result.title}\n${result.snippet}\n${result.link}\n\n`;
-      });
-    }
-  
-    prompt += `\nJSON Response Format:
+  let prompt = `Analyze this news claim and your existing data and knowledge.The respond STRICTLY in JSON format:\n\n`;
+  prompt += `Claim: "${newsText}"\n\n`;
+
+  if (searchResults.length > 0) {
+    prompt += `Supporting search results:\n`;
+    searchResults.forEach((result, i) => {
+      prompt += `${i + 1}. ${result.title}\n${result.snippet}\n${result.link}\n\n`;
+    });
+  }
+
+  prompt += `\nJSON Response Format:
     {
       "title": "string (short title according to the query)",
       "truth_score": "number (0-100)",
@@ -118,9 +118,9 @@ export function generateTextCheckPrompt(newsText: string, searchResults: any[]):
       "reason": "string (detailed analysis)",
       "evidence_links": ["url1", "url2"]
     }`;
-  
-    return prompt;
-  }
+
+  return prompt;
+}
 
 export function generateImageCheckPrompt(query: string, searchResults: any[]): string {
   let prompt = `This image has been claimed to show the following:

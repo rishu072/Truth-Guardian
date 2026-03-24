@@ -4,8 +4,11 @@ import requests
 import os
 import re
 import json
+import logging
 
 from utils import GEMINI_API_KEY
+
+logger = logging.getLogger(__name__)
 
 client=genai.Client(api_key=GEMINI_API_KEY)
 
@@ -93,9 +96,9 @@ def analyze_text_news(news_text, search_results):
     
 
     try:
-        result= extract_json(response.text)
-        
-    except:
+        result = extract_json(response.text)
+    except Exception as e:
+        logger.error(f"Failed to parse Gemini response: {str(e)}")
         result = {"error": "Could not parse Gemini response."}
     return result
 

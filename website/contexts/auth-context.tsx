@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
 import { auth, db } from "@/lib/firebase"
-import { collection, query, orderBy, limit, getDocs,addDoc,where } from "firebase/firestore"
+import { collection, query, orderBy, limit, getDocs, addDoc, where } from "firebase/firestore"
 
 import {
   signInWithEmailAndPassword,
@@ -43,7 +43,7 @@ type AuthContextType = {
   addCredits: (amount: number) => void
   updateProfile: (updates: { name?: string; avatar?: string }) => Promise<void>
   saveVerification: (response: any) => Promise<string | undefined>
-  fetchUserVerifications: (userId: string) => Promise<any[]>  
+  fetchUserVerifications: (userId: string) => Promise<any[]>
   getVerificationById: (id: string) => Promise<any | null>
 
 }
@@ -100,12 +100,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       return result.id
     } catch (error: any) {
-      console.error("Error saving verification:", error.message)
+      console.error("Error saving verification:", error instanceof Error ? error.message : String(error))
       return undefined
     }
   }
-  
-  
+
+
 
 
   const fetchUserVerifications = async (userId: string): Promise<any[]> => {
@@ -120,25 +120,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const querySnapshot = await getDocs(q)
       return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
     } catch (error: any) {
-      console.error("Error fetching verifications:", error.message)
+      console.error("Error fetching verifications:", error instanceof Error ? error.message : String(error))
       return []
     }
   }
-  
+
   const getVerificationById = async (id: string): Promise<any | null> => {
     try {
       const docRef = doc(db, "verifications", id)
       const docSnap = await getDoc(docRef)
       if (docSnap.exists()) {
-        const verificationData=docSnap.data()
+        const verificationData = docSnap.data()
         const userDocRef = doc(db, "users", verificationData.userId)
         const userDoc = await getDoc(userDocRef)
         if (userDoc.exists()) {
           const userData = userDoc.data()
-          
-          return { id: docSnap.id,name:userData.name, ...docSnap.data() }
+
+          return { id: docSnap.id, name: userData.name, ...docSnap.data() }
         }
-        return { id: docSnap.id,name:"Unverified User", ...docSnap.data() }
+        return { id: docSnap.id, name: "Unverified User", ...docSnap.data() }
       } else {
         console.warn("No such verification found with ID:", id)
         return null
@@ -156,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return null
     }
   }
-  
+
 
 
   const updateProfile = async (updates: { name?: string; avatar?: string }) => {
@@ -258,7 +258,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })
       }
 
-      
+
 
       toast({
         title: "Signed in with Google",
@@ -344,21 +344,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-  value={{
-    user,
-    isLoading,
-    signIn,
-    signInWithGoogle,
-    signUp,
-    signOut,
-    deductCredits,
-    addCredits,
-    updateProfile,
-    saveVerification,
-        fetchUserVerifications, 
+      value={{
+        user,
+        isLoading,
+        signIn,
+        signInWithGoogle,
+        signUp,
+        signOut,
+        deductCredits,
+        addCredits,
+        updateProfile,
+        saveVerification,
+        fetchUserVerifications,
         getVerificationById
-  }}
->
+      }}
+    >
 
       {children}
     </AuthContext.Provider>
