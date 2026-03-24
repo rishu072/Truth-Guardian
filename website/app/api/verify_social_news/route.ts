@@ -1,69 +1,48 @@
 import { NextResponse } from "next/server";
-import { JSDOM } from 'jsdom';
-import { fetchSearchResults } from "@/lib/utils";
-import { analyzeWithGemini, generateImageCheckPrompt, generateTextCheckPrompt } from "@/lib/gemini";
+
+/**
+ * POST /api/verify_social_news
+ *
+ * Proxies social media verification requests to the Django backend.
+ */
+
+const DJANGO_API_BASE = process.env.DJANGO_API_BASE || "http://localhost:8000";
+
 const ALLOWED_ORIGINS = [
   process.env.EXTENSION!,
-  process.env.BROWSER!
-];
+  process.env.BROWSER!,
+].filter(Boolean);
 
 export async function POST(request: Request) {
   try {
-        const origin = request.headers.get("origin");
-    
-        if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
-          return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
-        }
-    const { url, claim = "verify the claim and check if it is true?",type="text" } = await request.json();
+    const origin = request.headers.get("origin");
 
-    const response = await fetch(url);
-    const html = await response.text();
-    
-    const dom = new JSDOM(html);
-    const doc = dom.window.document;
-
-    const title = doc.title || "";
-    const metaDesc = doc.querySelector('meta[name="description"]');
-    const metaContent = metaDesc?.getAttribute("content") || "";
-    const fullClaim = `${title}\n${metaContent}\n${claim}`;
-
-    const imageTag = doc.querySelector('meta[property="og:image"]') || doc.querySelector("img");
-    const imageUrl = imageTag?.getAttribute("content") || imageTag?.getAttribute("src") || "";
-
-    const searchResults = await fetchSearchResults(fullClaim);
-    let prompt;
-    if (type == "image") {
-      prompt = generateImageCheckPrompt(fullClaim, searchResults);
-      
-    }
-    else {
-      prompt=generateTextCheckPrompt(fullClaim,searchResults);
+    if (ALLOWED_ORIGINS.length > 0 && origin && !ALLOWED_ORIGINS.includes(origin)) {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
     }
 
-    let result;
+    const { url, claim = "Verify the claim and check if it is true.", type = "text" } =
+      await request.json();
 
-    if (imageUrl && type=="image" ) {
-      const imageResponse = await fetch(imageUrl);
-      const imageBuffer = await imageResponse.arrayBuffer();
-      const base64Data = Buffer.from(imageBuffer).toString('base64');
-      
-      const supportedTypes = ['jpeg', 'png', 'webp'];
-      const ext = imageUrl.split('.').pop()?.split('?')[0].toLowerCase() || 'jpeg';
-      const finalExt = supportedTypes.includes(ext) ? ext : 'jpeg';
-      const mimeType = `image/${finalExt}`;
-      
+    if (!url) {
+      return NextResponse.json({ error: "URL is required" }, { status: 400 });
+    }
 
-      result= await analyzeWithGemini(prompt, {
-        mimeType,
-        data: base64Data
-      });
-    } else {
-      result = await analyzeWithGemini(prompt);
+    const djangoResponse = await fetch(`${DJANGO_API_BASE}/api/detect/social/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url, claim }),
+    });
+
+    const result = await djangoResponse.json();
+
+    if (!djangoResponse.ok) {
+      return NextResponse.json(result, { status: djangoResponse.status });
     }
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Error verifying social news:", error);
+    console.error("Error proxying social verification:", error);
     return NextResponse.json(
       { error: "Failed to process social media verification request" },
       { status: 500 }

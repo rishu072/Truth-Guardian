@@ -1,4 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
 .venv/
+env/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+*.log
+
+# Environment
 .env
-train.ipynb
-__pycache__
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

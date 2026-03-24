@@ -2,53 +2,61 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>Truth Guardian</title>
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self'; object-src 'none';" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./popup.css" />
+  <meta charset="UTF-8" />
+  <title>Truth Guardian AI</title>
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self'; object-src 'none';" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="./popup.css" />
 </head>
 
 <body>
-    <h1 style="margin-top: 10px; font-size: 1.1rem; font-weight: 600; color: #333;">
-        Truth Guardian AI
-     </h1>
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="text">Text</button>
-        <button class="tab-btn" data-tab="social">Social</button>
-        <button class="tab-btn" data-tab="image">Image</button>
-    </div>
+  <div class="header">
+    <div class="logo">🛡️</div>
+    <h1>Truth Guardian AI</h1>
+    <p class="tagline">AI-Powered Fake News Detection</p>
+  </div>
 
-    <div class="tab active" data-tab="text">
-        <form id="textForm">
-            <input type="text" id="textInput" placeholder="Enter claim" required />
-            <button type="submit">Verify Text</button>
-        </form>
-    </div>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="text">📝 Text</button>
+    <button class="tab-btn" data-tab="social">🌐 Social</button>
+    <button class="tab-btn" data-tab="image">🖼️ Image</button>
+  </div>
 
-    <div class="tab" data-tab="social">
-        <form id="socialForm">
-            <input type="url" id="socialLink" placeholder="Social Media URL" required />
-            <input type="text" id="socialClaim" placeholder="Claim to verify" required />
-            <div>
-                <label><input type="radio" name="socialOption" value="text" checked /> Text</label>
-                <label><input type="radio" name="socialOption" value="image" /> Image</label>
-            </div>
-            <button type="submit">Verify Social</button>
-        </form>
-    </div>
+  <!-- Text Tab -->
+  <div class="tab active" data-tab="text">
+    <form id="textForm">
+      <textarea id="textInput" placeholder="Enter or paste a news claim to verify…" rows="4" required></textarea>
+      <button type="button" id="grabSelectedBtn" class="secondary-btn">📋 Grab Selected Text</button>
+      <button type="submit" class="primary-btn">🔍 Verify Text</button>
+    </form>
+  </div>
 
-    <div class="tab" data-tab="image">
-        <form id="imageForm">
-            <input type="file" id="imageFile" accept="image/*" required />
-            <input type="text" id="imageClaim" placeholder="Claim to verify" required />
-            <button type="submit">Verify Image</button>
-        </form>
-    </div>
+  <!-- Social Tab -->
+  <div class="tab" data-tab="social">
+    <form id="socialForm">
+      <input type="url" id="socialLink" placeholder="Social Media Post URL" required />
+      <textarea id="socialClaim" placeholder="Claim to verify (optional)" rows="2"></textarea>
+      <button type="submit" class="primary-btn">🔍 Verify Social Post</button>
+    </form>
+  </div>
 
-    <div id="result" class="hidden"></div>
+  <!-- Image Tab -->
+  <div class="tab" data-tab="image">
+    <form id="imageForm">
+      <label class="file-upload-label" for="imageFile">
+        📁 Choose Image
+        <input type="file" id="imageFile" accept="image/*" required />
+      </label>
+      <span id="fileName" class="file-name">No file chosen</span>
+      <textarea id="imageClaim" placeholder="Describe the image claim…" rows="2"></textarea>
+      <button type="submit" class="primary-btn">🔍 Verify Image</button>
+    </form>
+  </div>
 
-    <script src="popup.js"></script>
+  <div id="result" class="hidden"></div>
+
+  <script src="config.js"></script>
+  <script src="popup.js"></script>
 </body>
 
 </html>
